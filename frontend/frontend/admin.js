@@ -1,6 +1,6 @@
 const API = "http://127.0.0.1:8000";
 
-console.log("Admin dashboard loaded");
+console.log("Admin panel loaded");
 
 async function loadMessages() {
   try {
@@ -17,17 +17,19 @@ async function loadMessages() {
           <td>${msg.name}</td>
           <td>${msg.email}</td>
           <td>${msg.message}</td>
+          <td>
+            <button onclick="deleteMessage(${msg.id})">
+              ❌ Delete
+            </button>
+          </td>
         </tr>
       `;
       table.innerHTML += row;
     });
 
-    console.log("Messages loaded:", data);
-
   } catch (err) {
-    console.error("Failed to load messages:", err);
+    console.error("Error loading messages:", err);
   }
 }
 
-// auto-load on page open
 loadMessages();
