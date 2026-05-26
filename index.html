@@ -1,84 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CyberConnect | Portfolio</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+const API = "http://127.0.0.1:8000";
 
-<body>
+console.log("Admin loaded");
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="logo">CyberConnect</div>
+async function loadMessages() {
+  const res = await fetch(`${API}/messages`);
+  const data = await res.json();
 
-  <div class="nav-links">
-    <a href="#skills">Skills</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-  </div>
+  const table = document.getElementById("messagesTable");
+  table.innerHTML = "";
 
-  <a class="cv-btn" href="cv.pdf" download>Download CV</a>
-</nav>
+  data.forEach(msg => {
+    table.innerHTML += `
+      <tr>
+        <td>${msg.id}</td>
+        <td>${msg.name}</td>
+        <td>${msg.email}</td>
+        <td>${msg.message}</td>
+        <td>
+          <button onclick="deleteMessage(${msg.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-<!-- MAIN CONTENT -->
-<div class="container">
+async function deleteMessage(id) {
+  await fetch(`${API}/messages/${id}`, {
+    method: "DELETE"
+  });
 
-  <!-- HERO -->
-  <header class="hero">
-    <h1>CyberConnect Portfolio</h1>
-    <p>Cybersecurity • Networking • Development</p>
-  </header>
+  loadMessages();
+}
 
-  <!-- SKILLS -->
-  <section id="skills" class="grid">
-
-    <div class="card">
-      <h2>🛡 Cybersecurity</h2>
-      <p>Threat detection, spoofing analysis, system security.</p>
-    </div>
-
-    <div class="card">
-      <h2>🌐 Networking</h2>
-      <p>Routing, infrastructure, Linux networking, VPNs.</p>
-    </div>
-
-    <div class="card">
-      <h2>💻 Development</h2>
-      <p>Python, APIs, backend systems, automation tools.</p>
-    </div>
-
-  </section>
-
-  <!-- PROJECTS -->
-  <section id="projects" class="card">
-    <h2>🚀 Projects</h2>
-    <p>✔ Cybersecurity Toolkit</p>
-    <p>✔ Network Scanner (Python)</p>
-    <p>✔ API Security Lab</p>
-  </section>
-<!-- CONTACT -->
-<section id="contact" class="card">
-  <h2>📩 Contact</h2>
-
-  <input id="name" placeholder="Your name">
-  <input id="email" type="email" placeholder="Your email">
-  <textarea id="message" placeholder="Your message"></textarea>
-
-  <button type="button" onclick="sendContact()">
-    Send Message
-  </button>
-
-  <p id="response"></p>
-</section>
-  </div> <!-- end container -->
-<!-- FOOTER -->
-<footer class="footer">
-  <p>© 2026 CyberConnect. All rights reserved.</p>
-  <p>Owner: Ruben Matias</p>
-</footer>
-
-
-<script src="./app.js?v=9999"></script>
-</body>
-</html>
+loadMessages();
