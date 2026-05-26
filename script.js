@@ -1,39 +1,35 @@
-document.getElementById("contactForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
+const API = "http://127.0.0.1:8000";
 
-    const responseBox = document.getElementById("response");
+console.log("Admin loaded");
 
-    const data = {
-        name: document.getElementById("name").value,
-        email: document.getElementById("email").value,
-        message: document.getElementById("message").value
-    };
+async function loadMessages() {
+  const res = await fetch(`${API}/messages`);
+  const data = await res.json();
 
-    try {
+  const table = document.getElementById("messagesTable");
+  table.innerHTML = "";
 
-        responseBox.innerText = "Sending message...";
+  data.forEach(msg => {
+    table.innerHTML += `
+      <tr>
+        <td>${msg.id}</td>
+        <td>${msg.name}</td>
+        <td>${msg.email}</td>
+        <td>${msg.message}</td>
+        <td>
+          <button onclick="deleteMessage(${msg.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-        const response = await fetch("https://YOUR-RENDER-URL.onrender.com/contact", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
+async function deleteMessage(id) {
+  await fetch(`${API}/messages/${id}`, {
+    method: "DELETE"
+  });
 
-        if (!response.ok) {
-            throw new Error("Failed to send");
-        }
+  loadMessages();
+}
 
-        const result = await response.json();
-
-        responseBox.innerText = result.message;
-
-        document.getElementById("contactForm").reset();
-
-    } catch (error) {
-
-        responseBox.innerText = "Something went wrong. Please try again.";
-
-    }
-});
+loadMessages();
