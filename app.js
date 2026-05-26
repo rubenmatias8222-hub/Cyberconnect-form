@@ -1,5 +1,5 @@
 console.log("🔥 NEW JS FILE LOADED");
-alert("JS IS NOW RUNNING (NO CACHE)");
+console.log("JS running");
 
 const API = "http://127.0.0.1:8000";
 
@@ -7,13 +7,16 @@ const API = "http://127.0.0.1:8000";
 // CONTACT FORM
 // ========================
 function sendContact() {
+  const btn = document.querySelector("button");
+  if (btn) btn.disabled = true;
+
   const nameInput = document.getElementById("name");
   const emailInput = document.getElementById("email");
   const messageInput = document.getElementById("message");
 
-  // Safeguard: Check if elements exist in the DOM first
   if (!nameInput || !emailInput || !messageInput) {
-    console.error("❌ Contact form elements missing from HTML.");
+    console.error("Contact form elements missing.");
+    if (btn) btn.disabled = false;
     return;
   }
 
@@ -23,78 +26,44 @@ function sendContact() {
 
   if (!name || !email || !message) {
     alert("Please fill in all fields");
+    if (btn) btn.disabled = false;
     return;
   }
-
-  console.log("📤 Sending contact data to backend...");
 
   fetch(`${API}/contact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      name: name,
-      email: email,
-      message: message
+    body: JSON.stringify({ name, email, message })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const responseBox = document.getElementById("response");
+
+      if (responseBox) {
+        responseBox.innerHTML = `
+          <div style="padding:10px;margin-top:10px;background:#111;color:#0f0;border-radius:8px;">
+            ✅ ${data.message}
+          </div>
+        `;
+      }
+
+      console.log("Server response:", data);
+      console.log("Message sent successfully");
+
+      nameInput.value = "";
+      emailInput.value = "";
+      messageInput.value = "";
+
+      if (btn) btn.disabled = false;
     })
-  })
-  .then(async (res) => {
-    // Check if the server returned an error code (400, 422, 500, etc.)
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(JSON.stringify(errorData) || `Server responded with status ${res.status}`);
-    }
-    return res.json();
-  })
-  .then(data => {
-    alert("Message sent successfully!");
-    console.log("✅ Contact response:", data);
-    
-    // Clear inputs on success
-    nameInput.value = "";
-    emailInput.value = "";
-    messageInput.value = "";
-  })
-  .catch(err => {
-    console.error("❌ Contact error detailed breakdown:", err.message);
-    alert("Failed to send message. Check browser console for network or CORS errors.");
-  });
-}
+    .catch(err => {
+      console.error("Contact error:", err);
+      alert("Failed to send message");
 
-// ========================
-// FILE UPLOAD
-// ========================
-function uploadFile() {
-  const fileInput = document.getElementById("file");
-
-  if (!fileInput || !fileInput.files.length) {
-    alert("Please select a file");
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const formData = new FormData();
-  formData.append("file", file);
-
-  console.log("📤 Uploading file...");
-
-  fetch(`${API}/upload`, {
-    method: "POST",
-    body: formData
-  })
-  .then(async (res) => {
-    if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
-    return res.json();
-  })
-  .then(data => {
-    alert("File uploaded successfully!");
-    console.log("✅ Upload response:", data);
-  })
-  .catch(err => {
-    console.error("❌ Upload error:", err);
-    alert("Upload failed");
-  });
+      if (btn) btn.disabled = false;
+    });
 }
 
 // ========================
@@ -104,8 +73,8 @@ function loadContent() {
   console.log("📥 Fetching dynamic content...");
   
   fetch(`${API}/content`)
-    .then(async (res) => {
-      if (!res.ok) throw new Error(`Content fetch failed with status ${res.status}`);
+    .then(res => {
+      if (!res.ok) throw new Error(`Content fetch failed: ${res.status}`);
       return res.json();
     })
     .then(data => {
@@ -120,7 +89,7 @@ function loadContent() {
     });
 }
 
-// Automatically trigger loadContent if an output div exists on page load
+// AUTO LOAD
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("output")) {
     loadContent();
