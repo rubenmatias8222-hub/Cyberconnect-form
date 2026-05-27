@@ -1,35 +1,99 @@
-const API = "http://127.0.0.1:8000";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
 
-console.log("Admin loaded");
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-async function loadMessages() {
-  const res = await fetch(`${API}/messages`);
-  const data = await res.json();
+<body class="bg-gray-100 min-h-screen p-6 sm:p-10">
 
-  const table = document.getElementById("messagesTable");
-  table.innerHTML = "";
+  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 border border-gray-200">
 
-  data.forEach(msg => {
-    table.innerHTML += `
-      <tr>
-        <td>${msg.id}</td>
-        <td>${msg.name}</td>
-        <td>${msg.email}</td>
-        <td>${msg.message}</td>
-        <td>
-          <button onclick="deleteMessage(${msg.id})">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
-}
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Inbox Messages</h2>
+        <p class="text-sm text-gray-500 mt-1">
+          Manage contact form messages from your backend.
+        </p>
+      </div>
 
-async function deleteMessage(id) {
-  await fetch(`${API}/messages/${id}`, {
-    method: "DELETE"
-  });
+      <button onclick="loadMessages()"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition">
+        Refresh
+      </button>
+    </div>
 
-  loadMessages();
-}
+    <!-- TABLE -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200">
 
-loadMessages();
+      <table class="min-w-full divide-y divide-gray-200 text-left">
+
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">ID</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Message</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase text-right">Action</th>
+          </tr>
+        </thead>
+
+        <tbody id="messagesTable" class="divide-y divide-gray-200 bg-white">
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function loadMessages() {
+      try {
+        const res = await fetch(`${API}/messages`);
+        const data = await res.json();
+
+        const table = document.getElementById("messagesTable");
+        table.innerHTML = "";
+
+        data.forEach(msg => {
+          table.innerHTML += `
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">${msg.id}</td>
+              <td class="px-6 py-4">${msg.name}</td>
+              <td class="px-6 py-4">${msg.email}</td>
+              <td class="px-6 py-4">${msg.message}</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-red-600 hover:underline"
+                  onclick="deleteMessage(${msg.id})">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+
+      } catch (err) {
+        console.error("Error loading messages:", err);
+      }
+    }
+
+    async function deleteMessage(id) {
+      await fetch(`${API}/messages/${id}`, {
+        method: "DELETE"
+      });
+
+      loadMessages();
+    }
+
+    loadMessages();
+  </script>
+
+</body>
+</html>
